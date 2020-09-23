@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "lwip",
+            "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+            "includePath": [
+                "${workspaceRoot}/lib",
+                "${workspaceRoot}/LWIP/App",
+                "${workspaceRoot}/LWIP/Target",
+                "${workspaceRoot}/Core/Inc",
+                "${workspaceRoot}/Drivers/STM32F4xx_HAL_Driver/Inc",
+                "${workspaceRoot}/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/system",                
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/netif/ppp",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/lwip",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/lwip/apps",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/lwip/priv",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/lwip/prot",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/netif",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/compat/posix",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/compat/posix/arpa",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/compat/posix/net",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/compat/posix/sys",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/src/include/compat/stdc",
+                "${workspaceRoot}/Middlewares/Third_Party/LwIP/system/arch"               
+            ],
+            "intelliSenseMode": "gcc-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}

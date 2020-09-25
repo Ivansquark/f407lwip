@@ -24,15 +24,17 @@
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart6;
+uint8_t interruptUsart=0;
 struct netif gnetif;
 
-
+uint8_t str[100]={0};
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_TIM3_Init(void);
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+void sendStr(char* str);
+void sendByte(uint8_t byte);
 /* USER CODE BEGIN PFP */
 int main(void)
 {
@@ -45,13 +47,21 @@ int main(void)
   MX_USART6_UART_Init();
   MX_LWIP_Init();
   MX_TIM3_Init();
-  uint8_t str[100]={0};
-  HAL_UART_Receive_IT(&huart6,(uint8_t*)str,1);
+  
   //HAL_UART_IRQHandler(&huart6);
-  HAL_UART_RxCpltCallback(&huart6);
+  //HAL_UART_RxCpltCallback(&huart6);
   __enable_irq();
   while (1)
   {
+    if(interruptUsart) {
+      sendByte(str[0]);
+      if(str[0]=='c'){
+        UART6_RxCpltCallback();
+      } else if (str[0] == 'd') {
+        tcp_client_disconnect();
+      }
+      interruptUsart = 0;
+    }
     ethernetif_input(&gnetif);    
     sys_check_timeouts();
     //char* str1 = "Try to connect\n";
@@ -60,10 +70,20 @@ int main(void)
   /* USER CODE END 3 */
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-  if(huart==&huart6)  {
-    UART6_RxCpltCallback();
+void USART6_IRQHandler(void) {
+  //USART6->SR&=~USART_SR_RXNE; // скидываем флаг
+  str[0] = USART6->DR;
+  interruptUsart=1;
+}
+
+void sendByte(uint8_t byte) {
+    while(!(USART6->SR & USART_SR_TXE)){};
+    USART6->DR=byte;
+}
+void sendStr(char* str){
+  uint8_t count=0;
+  while(str[count]!='\n'){
+    sendByte(str[count++]);
   }
 }
 
@@ -185,7 +205,9 @@ static void MX_USART6_UART_Init(void)
   /* USER CODE BEGIN USART6_Init 2 */
 
   /* USER CODE END USART6_Init 2 */
-  NVIC_EnableIRQ(USART6_IRQn);
+   USART6->CR1|=USART_CR1_RXNEIE; //enable interrupt on Rx from usart1
+  __NVIC_SetPriority(USART6_IRQn, 0);
+   NVIC_EnableIRQ(USART6_IRQn);
 
 }
 

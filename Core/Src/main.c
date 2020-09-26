@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "net.h"
 #include "lwip.h"
 
 /* Private variables ---------------------------------------------------------*/
@@ -50,24 +51,29 @@ int main(void)
   
   //HAL_UART_IRQHandler(&huart6);
   //HAL_UART_RxCpltCallback(&huart6);
+     
   __enable_irq();
+  uint8_t connectState=0;
   while (1)
   {
     if(interruptUsart) {
       sendByte(str[0]);
       if(str[0]=='c'){
         UART6_RxCpltCallback();
+        connectState=1;
       } else if (str[0] == 'd') {
-        tcp_client_disconnect();
+        connectState=0;
+        tcp_client_discon();
+      }else {
+        if(connectState) {
+          sendstring(str);
+        }
       }
       interruptUsart = 0;
-    }
-    ethernetif_input(&gnetif);    
-    sys_check_timeouts();
-    //char* str1 = "Try to connect\n";
-    //HAL_UART_Transmit(&huart6,(uint8_t*)str1,strlen(str1),0x1000);
+    }  
+    ethernetif_input(&gnetif); 
+    sys_check_timeouts();  
   }
-  /* USER CODE END 3 */
 }
 
 void USART6_IRQHandler(void) {
@@ -82,7 +88,7 @@ void sendByte(uint8_t byte) {
 }
 void sendStr(char* str){
   uint8_t count=0;
-  while(str[count]!='\n'){
+  while(str[count]!='\0'){
     sendByte(str[count++]);
   }
 }

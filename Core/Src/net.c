@@ -11,7 +11,7 @@ uint8_t ip[4] = {10,42,0,1};
  uint16_t port = 55555;
 uint8_t IsConnected = 0;
 struct tcp_pcb *tcp_client_pcb;
-struct client_struct *cs;
+struct client_struct *cs; //status state structure
 //extern volatile uint32_t message_count=0;
 uint8_t data[100]; //buffer for data
 
@@ -30,16 +30,19 @@ static err_t tcp_client_connected(void* arg, struct tcp_pcb* tpcb, err_t err) {
     if (cs != NULL) {
         cs->state = ES_CONNECTED;
         cs->pcb = tpcb;
-        cs->p_tx = pbuf_alloc(PBUF_TRANSPORT, strlen((char*)data) , PBUF_POOL);
+        /*!< allocate memory for struct pbuf (headers) PBUF_POOL- for Rx >*/
+        cs->p_tx = pbuf_alloc(PBUF_TRANSPORT, strlen((char*)data) , PBUF_POOL); //tx must be PBUF_RAM
         if (cs->p_tx) {
           /* copy data to pbuf */
           char* str = "Hello PC!!!";
           for(uint8_t i=0;i<strlen(str);i++){
               data[i] = str[i];
-          }          
-          pbuf_take(cs->p_tx, (char*)data, strlen((char*)data));
-          /* pass newly allocated cs structure as argument to tpcb */
+          }        
+          /*!< initial fills pbuf with data >*/  
+          pbuf_take(cs->p_tx, (char*)data, strlen((char*)data));         
+          /* pass newly allocated cs structure as argument to tpcb connects pcb to client struct*/
           tcp_arg(tpcb, cs);
+          /*!< Sets callback functions on tcp events >*/
           /* initialize LwIP tcp_recv callback function */
           tcp_recv(tpcb, tcp_client_recv);
           /* initialize LwIP tcp_sent callback function */
@@ -60,9 +63,11 @@ static err_t tcp_client_connected(void* arg, struct tcp_pcb* tpcb, err_t err) {
 
 void tcp_client_connect() {
     ip_addr_t DestIPaddr;
+    /*!< create new TCP PCB (memory allocation) >*/
     tcp_client_pcb = tcp_new(); //@return a new tcp_pcb that initially is in state CLOSED
     if(tcp_client_pcb != NULL) {
         IP4_ADDR(&DestIPaddr,ip[0],ip[1],ip[2],ip[3]);
+        /*!< Connects to remote TCP host >*/
         tcp_connect(tcp_client_pcb,&DestIPaddr,port,tcp_client_connected);
         char* str1 = "Try to connect\n";
         sendStr(str1);
@@ -72,19 +77,21 @@ void tcp_client_discon() {
     tcp_client_disconnect(tcp_client_pcb,cs);
 }
 static void tcp_client_disconnect(struct tcp_pcb *tpcb, struct client_struct * cs) {
+    /*!< sets callback functions to NULL >*/
     tcp_recv(tcp_client_pcb, NULL);
     tcp_sent(tcp_client_pcb, NULL);
     tcp_poll(tcp_client_pcb, NULL,0);
     if (cs != NULL) {
     mem_free(cs);
     }
+    /*!< close connection >*/
     tcp_close(tcp_client_pcb);
     char* str1 = "\ndisconnectedd\n";
     sendStr(str1);
 }
 
 /*!<callback function from LwIP that calls when client receives data>*/
-/** pbuf* p - Main packet buffer struct */
+/* pbuf* p - Main packet buffer struct */
 static err_t tcp_client_recv(void *arg, struct tcp_pcb* tpcb, struct pbuf* p, err_t err) {
     struct client_struct* es;
     err_t errt; 
@@ -128,6 +135,7 @@ static void tcp_client_send(struct tcp_pcb* tpcb, struct client_struct * es) {
     err_t wr_err = ERR_OK;
     while ((wr_err == ERR_OK) && (es->p_tx != NULL) && (es->p_tx->len <= tcp_sndbuf(tpcb))) {
         ptr = es->p_tx;
+        /*!< push data to queue from which its transmits to remote host (server) >*/
         wr_err = tcp_write(tpcb, ptr->payload, ptr->len, 1); //1: without PUSH, 2: with PUSH
         if (wr_err == ERR_OK) {
             es->p_tx = ptr->next;

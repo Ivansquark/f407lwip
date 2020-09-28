@@ -26,6 +26,7 @@
 TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart6;
 uint8_t interruptUsart=0;
+/*!< Struct of network interface level >*/
 struct netif gnetif;
 
 uint8_t str[100]={0};
@@ -34,8 +35,8 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_TIM3_Init(void);
-void sendStr(char* str);
-void sendByte(uint8_t byte);
+void sendStr(char* str);  //for uart 6
+void sendByte(uint8_t byte); // for uart 6
 /* USER CODE BEGIN PFP */
 int main(void)
 {
@@ -48,10 +49,7 @@ int main(void)
   MX_USART6_UART_Init();
   MX_LWIP_Init();
   MX_TIM3_Init();
-  
-  //HAL_UART_IRQHandler(&huart6);
-  //HAL_UART_RxCpltCallback(&huart6);
-     
+    
   __enable_irq();
   uint8_t connectState=0;
   while (1)

@@ -368,7 +368,7 @@ netif_add(struct netif *netif,
 #endif /* LWIP_IPV4 */
 
   /* call user specified initialization function for netif */
-  if (init(netif) != ERR_OK) {
+  if (init(netif) != ERR_OK) { //here calls LwIP callback function thats inits net interface
     return NULL;
   }
 #if LWIP_IPV6 && LWIP_ND6_ALLOW_RA_UPDATES

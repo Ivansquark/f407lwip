@@ -6,6 +6,7 @@
         "cstdio": "cpp",
         "cstddef": "cpp",
         "type_traits": "cpp",
-        "internet": "cpp"
+        "internet": "cpp",
+        "*.tcc": "c"
     }
 }
